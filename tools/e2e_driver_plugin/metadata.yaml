@@ -1,0 +1,7 @@
+name: astrbot_plugin_feiyu_bridge_e2e_driver
+display_name: Feiyu Bridge E2E Driver
+desc: 隔离环境专用任务注入器；禁止部署生产。
+version: v0.1.0-test
+author: zexuan604
+repo: ""
+astrbot_version: ">=4.29.4,<5"

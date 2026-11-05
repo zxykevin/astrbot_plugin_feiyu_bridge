@@ -1,0 +1,35 @@
+{
+  "protocol": "feiyu-bridge/1",
+  "description": "Fixed dsh.workflow.run lease and session-isolation vector",
+  "identity": {
+    "sender_id": "10001",
+    "origin": "napcat:GroupMessage:20001"
+  },
+  "expected_session_key": "qq:8b96a9f6e80d064af0ebb7b55e541503974ab5594ff6e919f21a55754097",
+  "valid_arguments": {
+    "prompt": "Summarize the current request",
+    "session_key": "qq:8b96a9f6e80d064af0ebb7b55e541503974ab5594ff6e919f21a55754097",
+    "timeout_seconds": 60
+  },
+  "invalid_cases": [
+    {
+      "name": "missing_session_key",
+      "arguments": {"prompt": "hello"}
+    },
+    {
+      "name": "legacy_workflow_field",
+      "arguments": {
+        "prompt": "hello",
+        "session_key": "qq:test",
+        "workflow": "legacy"
+      }
+    },
+    {
+      "name": "model_selected_session",
+      "arguments": {
+        "prompt": "hello",
+        "session_key": "../../shared"
+      }
+    }
+  ]
+}

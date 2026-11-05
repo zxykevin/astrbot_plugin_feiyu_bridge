@@ -1,0 +1,8 @@
+{
+  "control_secret": {
+    "description": "隔离 E2E 控制令牌",
+    "type": "string",
+    "default": "",
+    "secret": true
+  }
+}

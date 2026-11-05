@@ -1,0 +1,17 @@
+{
+  "bridge_secret": "isolated-test-bridge-secret-32-characters!!",
+  "client_id": "windows-dsh-isolated",
+  "authorized_sender_ids": [],
+  "allowed_capabilities": [
+    "dsh.workflow.run",
+    "dsh.status.read"
+  ],
+  "heartbeat_timeout_seconds": 25,
+  "request_timeout_seconds": 30,
+  "max_request_timeout_seconds": 120,
+  "max_queue_size": 8,
+  "max_payload_bytes": 262144,
+  "auth_clock_skew_seconds": 60,
+  "task_retention_seconds": 300
+}
+

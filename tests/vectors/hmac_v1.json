@@ -1,0 +1,37 @@
+{
+  "protocol": "feiyu-bridge/1",
+  "description": "Fixed HMAC-SHA256 interoperability vectors for Bridge Protocol v1",
+  "secret": "feiyu-bridge-test-secret-32-bytes!!",
+  "client_id": "windows-dsh-test",
+  "method": "POST",
+  "protocol_path": "/v1/heartbeat",
+  "timestamp": "1793790000",
+  "nonce": "0123456789abcdefABCDEF_-",
+  "body_utf8": "{\"active_task_id\":null,\"agent_version\":\"0.1.0-test\",\"capabilities\":[\"dsh.workflow.run\"]}",
+  "body_sha256": "7a6ee344d1ccec198bb7bbb9a66dbf2602191609affffcc2340b704ed19c9a42",
+  "canonical_message_utf8": "FEIYU-BRIDGE-V1\nPOST\n/v1/heartbeat\n1793790000\n0123456789abcdefABCDEF_-\n7a6ee344d1ccec198bb7bbb9a66dbf2602191609affffcc2340b704ed19c9a42",
+  "signature_hex": "503f9a83b2a8fabdfa39b7bcec14e3a80d5c353d1bec69340701930f625ce2ac",
+  "cases": {
+    "valid": {
+      "verification_time": 1793790000,
+      "expected": "accepted"
+    },
+    "tampered_body": {
+      "verification_time": 1793790000,
+      "body_utf8": "{\"active_task_id\":null,\"agent_version\":\"0.1.0-test\",\"capabilities\":[\"dsh.workflow.run\",\"dsh.status.read\"]}",
+      "reuse_original_signature": true,
+      "expected_error": "AUTH_INVALID_SIGNATURE"
+    },
+    "expired_timestamp": {
+      "verification_time": 1793790061,
+      "expected_error": "AUTH_TIMESTAMP_EXPIRED"
+    },
+    "repeated_nonce": {
+      "verification_time": 1793790000,
+      "verify_count": 2,
+      "expected_first": "accepted",
+      "expected_second_error": "AUTH_REPLAY"
+    }
+  }
+}
+

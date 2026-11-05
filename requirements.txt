@@ -1,0 +1,2 @@
+# Phase 1 intentionally uses only Python and AstrBot runtime dependencies.
+

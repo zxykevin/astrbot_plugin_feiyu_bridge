@@ -1,0 +1,178 @@
+{
+  "bridge_secret": {
+    "description": "Bridge Protocol v1 HMAC 密钥",
+    "type": "string",
+    "default": "",
+    "secret": true,
+    "obvious_hint": true,
+    "hint": "至少 32 个随机字符。不要与 AstrBot OpenAPI Key、SSH 密钥或其他服务共享。"
+  },
+  "client_id": {
+    "description": "允许连接的 Windows Agent ID",
+    "type": "string",
+    "default": "windows-dsh"
+  },
+  "authorized_sender_ids": {
+    "description": "允许调用 dsh_execute 的 QQ 用户",
+    "type": "list",
+    "default": [],
+    "_special": "sender_id",
+    "hint": "默认空列表会禁用所有执行请求。主动聊天和缺少真实用户消息的调用始终被拒绝。"
+  },
+  "allowed_capabilities": {
+    "description": "Windows Agent 能执行的精确能力白名单",
+    "type": "list",
+    "default": [],
+    "hint": "用户任务使用 dsh.status.read/dsh.workflow.run；自主日记另需 dsh.feiyu_home.diary.append/read_recent。默认空，shell、ssh、powershell、cmd 等始终禁止。"
+  },
+  "heartbeat_timeout_seconds": {
+    "description": "Agent 离线判定时间（秒）",
+    "type": "int",
+    "default": 25,
+    "slider": {"min": 10, "max": 120, "step": 1}
+  },
+  "request_timeout_seconds": {
+    "description": "默认 DSH 任务超时（秒）",
+    "type": "int",
+    "default": 30,
+    "slider": {"min": 5, "max": 300, "step": 1}
+  },
+  "max_request_timeout_seconds": {
+    "description": "Agent 工具允许请求的最大超时（秒）",
+    "type": "int",
+    "default": 120,
+    "slider": {"min": 10, "max": 600, "step": 1}
+  },
+  "async_task_timeout_seconds": {
+    "description": "异步 DSH 任务默认超时（秒）",
+    "type": "int",
+    "default": 3600,
+    "hint": "异步任务立即返回 task_id；此值不限制调用方等待时间。"
+  },
+  "async_task_max_timeout_seconds": {
+    "description": "异步 DSH 任务最大超时（秒）",
+    "type": "int",
+    "default": 86400,
+    "hint": "最大 24 小时；Windows DSH 端仍会应用自身安全上限。"
+  },
+  "max_queue_size": {
+    "description": "最大等待任务数",
+    "type": "int",
+    "default": 8,
+    "slider": {"min": 1, "max": 32, "step": 1}
+  },
+  "max_payload_bytes": {
+    "description": "请求或结果的最大 JSON 字节数",
+    "type": "int",
+    "default": 262144,
+    "hint": "默认 256 KiB，防止通过 Bridge 传输屏幕录像或大文件。"
+  },
+  "auth_clock_skew_seconds": {
+    "description": "HMAC 时间戳允许偏差（秒）",
+    "type": "int",
+    "default": 60,
+    "slider": {"min": 15, "max": 300, "step": 1}
+  },
+  "task_retention_seconds": {
+    "description": "终态任务的内存保留时间（秒）",
+    "type": "int",
+    "default": 300,
+    "slider": {"min": 30, "max": 3600, "step": 30}
+  },
+  "recovery_grace_seconds": {
+    "description": "重启后等待 DSH 重新关联运行任务的时间（秒）",
+    "type": "int",
+    "default": 30,
+    "slider": {"min": 5, "max": 300, "step": 5}
+  },
+  "notification_poll_seconds": {
+    "description": "完成通知扫描间隔（秒）",
+    "type": "int",
+    "default": 5,
+    "slider": {"min": 1, "max": 60, "step": 1}
+  },
+  "notification_max_attempts": {
+    "description": "完成通知最多发送次数",
+    "type": "int",
+    "default": 3,
+    "slider": {"min": 1, "max": 10, "step": 1}
+  },
+  "notification_retry_seconds": {
+    "description": "完成通知重试退避基数（秒）",
+    "type": "int",
+    "default": 30,
+    "slider": {"min": 5, "max": 600, "step": 5}
+  },
+  "autonomous_enabled": {
+    "description": "启用 Feiyu Autonomous Task（默认禁用）",
+    "type": "bool",
+    "default": false,
+    "hint": "启用前必须完成隔离测试，并让 Windows Agent 精确实现两个 diary 能力。不会把结果发送到 QQ。"
+  },
+  "autonomous_provider_id": {
+    "description": "自主任务专用 LLM Provider ID",
+    "type": "string",
+    "default": "",
+    "hint": "必须显式填写；自主任务不借用 QQ 会话身份或会话上下文。"
+  },
+  "autonomous_timezone": {
+    "description": "自主任务时区（IANA 名称）",
+    "type": "string",
+    "default": "Europe/Berlin"
+  },
+  "autonomous_quiet_hours": {
+    "description": "自主任务免打扰时段（开始小时-结束小时）",
+    "type": "string",
+    "default": "2-6",
+    "hint": "建议与主动聊天插件保持一致；跨午夜可写 23-7。"
+  },
+  "autonomous_check_interval_minutes": {
+    "description": "自主决策检查间隔（分钟）",
+    "type": "int",
+    "default": 180,
+    "slider": {"min": 5, "max": 1440, "step": 5}
+  },
+  "autonomous_min_interval_minutes": {
+    "description": "两次自主决策尝试的最小间隔（分钟）",
+    "type": "int",
+    "default": 360,
+    "slider": {"min": 5, "max": 2880, "step": 5}
+  },
+  "autonomous_daily_task_limit": {
+    "description": "每天最多成功执行的自主读写任务数",
+    "type": "int",
+    "default": 2,
+    "slider": {"min": 1, "max": 24, "step": 1}
+  },
+  "autonomous_daily_write_limit": {
+    "description": "每天最多成功追加的日记数",
+    "type": "int",
+    "default": 1,
+    "slider": {"min": 1, "max": 10, "step": 1}
+  },
+  "autonomous_timeout_seconds": {
+    "description": "单个自主任务超时（秒）",
+    "type": "int",
+    "default": 45,
+    "slider": {"min": 5, "max": 300, "step": 5}
+  },
+  "autonomous_retry_base_minutes": {
+    "description": "自主任务失败退避基数（分钟）",
+    "type": "int",
+    "default": 15,
+    "slider": {"min": 1, "max": 1440, "step": 1}
+  },
+  "autonomous_retry_max_minutes": {
+    "description": "自主任务失败退避上限（分钟）",
+    "type": "int",
+    "default": 360,
+    "slider": {"min": 1, "max": 10080, "step": 1}
+  },
+  "autonomous_read_limit": {
+    "description": "一次最多读取的近期日记条数",
+    "type": "int",
+    "default": 3,
+    "slider": {"min": 1, "max": 10, "step": 1}
+  }
+}
+
