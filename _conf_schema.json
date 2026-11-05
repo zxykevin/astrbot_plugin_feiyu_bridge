@@ -103,6 +103,48 @@
     "default": 30,
     "slider": {"min": 5, "max": 600, "step": 5}
   },
+  "agent_report_enabled": {
+    "description": "由原 QQ 会话的 AstrBot Agent 生成异步任务完成汇报",
+    "type": "bool",
+    "default": true,
+    "hint": "使用原会话、人设和记忆；失败时仅发送包含 task_id 的简短系统通知。"
+  },
+  "agent_report_timeout_seconds": {
+    "description": "Agent 完成汇报超时（秒）",
+    "type": "int",
+    "default": 90,
+    "slider": {"min": 10, "max": 300, "step": 5}
+  },
+  "agent_report_max_result_chars": {
+    "description": "传给 Agent 的 DSH 结果摘录最大字符数",
+    "type": "int",
+    "default": 12000,
+    "hint": "完整结果仍保存在 SQLite，Agent 只接收有界的不可信数据摘录。"
+  },
+  "agent_report_max_output_chars": {
+    "description": "Agent 自动汇报最大字符数",
+    "type": "int",
+    "default": 2000
+  },
+  "agent_report_max_steps": {
+    "description": "Agent 汇报最大推理步数",
+    "type": "int",
+    "default": 4,
+    "slider": {"min": 1, "max": 8, "step": 1}
+  },
+  "agent_report_max_concurrency": {
+    "description": "不同 QQ 会话可并行生成的完成汇报数",
+    "type": "int",
+    "default": 2,
+    "slider": {"min": 1, "max": 8, "step": 1},
+    "hint": "同一会话始终串行，并与 AstrBot 正常聊天共享会话锁。"
+  },
+  "notification_send_timeout_seconds": {
+    "description": "降级系统通知发送超时（秒）",
+    "type": "int",
+    "default": 15,
+    "slider": {"min": 5, "max": 60, "step": 5}
+  },
   "autonomous_enabled": {
     "description": "启用 Feiyu Autonomous Task（默认禁用）",
     "type": "bool",

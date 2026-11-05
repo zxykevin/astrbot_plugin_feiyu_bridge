@@ -79,11 +79,15 @@ cannot be recovered with the current DSH API.
 ## Notifications
 
 Terminal and `unknown` transitions are committed before notification delivery.
-A separate loop claims persisted pending notifications and sends a plain
-`MessageChain` through AstrBot `Context.send_message` to the original
-`unified_msg_origin`. It does not call an LLM or the proactive-chat plugin.
-Claims and attempts are persisted; process-interrupted claims become retries on
-startup. The default is three attempts with bounded linear backoff.
+A separate loop claims persisted pending reports and restores the original
+AstrBot conversation through the official main-Agent builder. The Agent uses
+the original persona, conversation context and LLM-request memory hooks to
+write a concise result summary. It receives a bounded untrusted-data excerpt
+and no tools; the complete DSH report remains in SQLite. If Agent generation is
+unavailable or times out, the Bridge sends only a short task-ID/status/query
+notice. Claims and attempts are persisted; process-interrupted claims become
+retries on startup. See `AGENT_REPORTING.md` for the security model and exact
+flow.
 
 ## Configuration additions
 
@@ -93,6 +97,10 @@ startup. The default is three attempts with bounded linear backoff.
 - `notification_poll_seconds`: 5 by default.
 - `notification_max_attempts`: 3 by default.
 - `notification_retry_seconds`: 30 by default.
+- `agent_report_enabled`: true by default.
+- `agent_report_timeout_seconds`: 90 by default.
+- `agent_report_max_concurrency`: 2 by default; each UMO remains serialized.
+- `notification_send_timeout_seconds`: 15 by default.
 
 The DSH default `tasks.maxTimeoutMs` is 86400000. An existing explicit DSH
 configuration keeps its configured value and must be reviewed during rollout.
@@ -106,18 +114,22 @@ configuration keeps its configured value and must be reviewed during rollout.
   cannot reconstruct the outcome and the task becomes `unknown`.
 - Active-message support depends on the QQ adapter. Exhausted notification
   retries remain visible as `notification_status=failed` for manual handling.
+- Persona, memory retrieval and adapter delivery require an AstrBot integration
+  environment; the isolated unit suite cannot validate their qualitative output.
 - The scheduler intentionally retains task rows; automated history pruning is
   not included in this change.
-- The source directories supplied for this work are not Git repositories.
 
 ## Development test result
 
-On 2026-11-05, the development workspace passed:
+The v2 scheduler baseline on 2026-11-05 passed:
 
 - AstrBot Bridge: 69/69 Python tests, including eight v2 async/recovery tests;
 - Windows DSH plugin: 79/79 Node tests, including the existing real loopback
   cancellation/reconnect coverage and a new timeout-over-300-seconds test;
 - Python bytecode compilation and `_conf_schema.json` parsing.
+
+Agent-reporting regression results are recorded in `AGENT_REPORTING.md` and the
+current delivery report.
 
 All v2 tests use temporary SQLite files, mock QQ events and mock/local DSH
 transports. They do not invoke shutdown, private-file deletion or another

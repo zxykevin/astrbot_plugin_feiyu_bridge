@@ -240,6 +240,14 @@ def _authorized_identity(
     context: ContextWrapper[AstrAgentContext], authorized_sender_ids: frozenset[str]
 ) -> tuple[tuple[Any, str, str] | None, str | None]:
     event = DshExecuteTool._event_from_context(context)
+    completion_marker = getattr(event, "get_extra", lambda *_args, **_kwargs: None)(
+        "feiyu_task_completion"
+    ) if event is not None else None
+    if completion_marker:
+        return None, DshExecuteTool._denied(
+            "COMPLETION_EVENT_DSH_DENIED",
+            "任务完成汇报事件不能调用 DSH 工具",
+        )
     sender_id = DshExecuteTool._event_value(event, "get_sender_id", "sender_id")
     origin = DshExecuteTool._event_value(event, "unified_msg_origin")
     message = str(getattr(event, "message_str", "") or "").strip()

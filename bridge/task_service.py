@@ -76,6 +76,9 @@ class BridgeTask:
     result_digest: str | None = None
     notify_on_terminal: bool = False
     notification_status: str = "not_required"
+    notification_attempts: int = 0
+    notification_last_error: str | None = None
+    notified_at: float | None = None
     recovery_pending: bool = False
     future: asyncio.Future[Any] | None = field(default=None, repr=False)
 
@@ -120,6 +123,12 @@ class BridgeTask:
             "dsh_session_id": self.dsh_session_id,
             "execution_id": self.execution_id,
             "notification_status": self.notification_status,
+            "agent_report_status": self.notification_status,
+            "agent_report_attempts": self.notification_attempts,
+            "agent_report_last_error": self.notification_last_error,
+            "agent_reported_at": (
+                None if self.notified_at is None else int(self.notified_at)
+            ),
         }
         if include_arguments:
             payload["arguments"] = self.arguments
@@ -213,6 +222,9 @@ class BridgeService:
             result_digest=row["result_digest"],
             notify_on_terminal=bool(row["notify_on_terminal"]),
             notification_status=row["notification_status"],
+            notification_attempts=int(row["notification_attempts"]),
+            notification_last_error=row["notification_last_error"],
+            notified_at=row["notified_at"],
             recovery_pending=bool(row["recovery_pending"]),
         )
 
@@ -593,6 +605,7 @@ class BridgeService:
         *,
         success: bool,
         error: str = "",
+        delivery_status: str = "sent",
         max_attempts: int = 3,
         retry_delay_seconds: int = 30,
     ) -> None:
@@ -603,9 +616,9 @@ class BridgeService:
         if success:
             self.store.update(
                 task_id,
-                notification_status="sent",
+                notification_status=delivery_status,
                 notification_attempts=attempts,
-                notification_last_error=None,
+                notification_last_error=str(error)[:512] if error else None,
                 notification_next_at=None,
                 notified_at=time.time(),
             )
@@ -620,7 +633,10 @@ class BridgeService:
             )
         task = self._tasks.get(task_id)
         if task:
-            task.notification_status = "sent" if success else ("failed" if attempts >= max_attempts else "retry")
+            task.notification_status = delivery_status if success else ("failed" if attempts >= max_attempts else "retry")
+            task.notification_attempts = attempts
+            task.notification_last_error = str(error)[:512] if error else None
+            task.notified_at = time.time() if success else None
 
     async def shutdown(self) -> None:
         # Preserve queued/running records for restart recovery. The DSH side will
@@ -663,7 +679,7 @@ class BridgeService:
         self._persist_task(task)
 
     def _terminal_notification(self, task: BridgeTask) -> None:
-        if task.notify_on_terminal and task.state in NOTIFIABLE_STATES and task.notification_status not in {"sent", "failed"}:
+        if task.notify_on_terminal and task.state in NOTIFIABLE_STATES and task.notification_status not in {"sent", "agent_sent", "fallback_sent", "failed"}:
             task.notification_status = "pending"
             self.store.update(task.task_id, notification_status="pending", notification_next_at=time.time())
 

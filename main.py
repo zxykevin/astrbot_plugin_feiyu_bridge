@@ -8,11 +8,12 @@ from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.star import Context, Star, StarTools
 
 from .bridge import (
+    AgentReportManager,
+    AstrBotAgentReporter,
     AutonomousPolicy,
     AutonomousTaskManager,
     BridgeAuthenticator,
     BridgeService,
-    TaskNotificationManager,
 )
 from .bridge.protocol import BRIDGE_CAPABILITIES
 from .bridge.tools import (
@@ -124,12 +125,28 @@ class FeiyuBridgePlugin(Star):
             FeiyuTaskCancelTool(service=self.service, authorized_sender_ids=authorized_sender_ids),
         )
 
-        self.notifications = TaskNotificationManager(
+        self.agent_reporter = AstrBotAgentReporter(
+            context=self.context,
+            authorized_sender_ids=authorized_sender_ids,
+            enabled=bool(config.get("agent_report_enabled", True)),
+            max_result_chars=int(config.get("agent_report_max_result_chars", 12000)),
+            max_output_chars=int(config.get("agent_report_max_output_chars", 2000)),
+            max_steps=int(config.get("agent_report_max_steps", 4)),
+        )
+        self.notifications = AgentReportManager(
             service=self.service,
-            send_call=self._send_task_notification,
+            report_call=self.agent_reporter,
+            fallback_send_call=self._send_task_fallback,
             poll_seconds=int(config.get("notification_poll_seconds", 5)),
+            report_timeout_seconds=int(
+                config.get("agent_report_timeout_seconds", 90)
+            ),
+            fallback_timeout_seconds=int(
+                config.get("notification_send_timeout_seconds", 15)
+            ),
             max_attempts=int(config.get("notification_max_attempts", 3)),
             retry_delay_seconds=int(config.get("notification_retry_seconds", 30)),
+            max_concurrency=int(config.get("agent_report_max_concurrency", 2)),
         )
         self.notifications.start()
 
@@ -147,9 +164,11 @@ class FeiyuBridgePlugin(Star):
                 "Feiyu Bridge 忽略了不受支持的能力配置: %s",
                 ", ".join(sorted(ignored_capabilities)),
             )
-        logger.info("Feiyu Bridge v0.3.0-dev initialized; persistent async scheduling enabled")
+        logger.info(
+            "Feiyu Bridge v0.4.0-dev initialized; Agent-based async reporting enabled"
+        )
 
-    async def _send_task_notification(self, origin: str, text: str) -> bool:
+    async def _send_task_fallback(self, origin: str, text: str) -> bool:
         chain = MessageChain().message(text)
         return bool(await self.context.send_message(origin, chain))
 

@@ -65,6 +65,9 @@ class RealQqEvent:
     def get_platform_name(self):
         return "aiocqhttp"
 
+    def get_extra(self, key, default=None):
+        return getattr(self, "extras", {}).get(key, default)
+
 
 RealQqEvent.__module__ = "astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event"
 
@@ -141,6 +144,20 @@ class AsyncTaskTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertTrue(queried["ok"])
         self.assertEqual(service.body_status()["queued_tasks"], before)
+        service.close()
+
+    async def test_completion_event_cannot_submit_another_dsh_task(self):
+        service = self.service()
+        event = RealQqEvent(message_id="completion-event")
+        event.extras = {
+            "feiyu_task_completion": {"task_id": "persisted-task-id"}
+        }
+        response = await self.submit(service, event=event)
+        self.assertFalse(response["ok"])
+        self.assertEqual(
+            response["error"]["code"], "COMPLETION_EVENT_DSH_DENIED"
+        )
+        self.assertEqual(service.body_status()["queued_tasks"], 0)
         service.close()
 
     async def test_completion_notifies_once_and_failed_send_retries(self):

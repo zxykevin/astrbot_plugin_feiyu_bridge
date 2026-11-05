@@ -32,6 +32,8 @@ calls fail closed while QQ, NapCat, LivingMemory and proactive chat continue.
 - `docs/COMPATIBILITY_REPORT.md`: Windows client compatibility repair result.
 - `docs/ASYNC_TASKS_V2.md`: persistent async scheduler, interfaces, recovery,
   notification, rollback and production rollout notes.
+- `docs/AGENT_REPORTING.md`: original-session Agent reporting, untrusted-result
+  isolation, fallback behavior, verification limits and rollback.
 - `tools/mock_windows_client.py`: independent real-HTTP mock Windows Agent.
 - `tests/`: standard-library unit tests for security and queue semantics.
 

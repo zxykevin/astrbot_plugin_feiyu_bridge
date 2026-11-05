@@ -1,7 +1,7 @@
 name: astrbot_plugin_feiyu_bridge
 display_name: Feiyu Bridge
 desc: 在 AstrBot 与受信任的 Windows DSH Agent 之间提供经过认证、可降级的任务桥梁。
-version: v0.3.0-dev
+version: v0.4.0-dev
 author: zexuan604
 repo: "https://github.com/zxykevin/astrbot_plugin_feiyu_bridge"
 astrbot_version: ">=4.29.4,<5"
